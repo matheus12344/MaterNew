@@ -1,6 +1,12 @@
 {
   "extends": "expo/tsconfig.base",
   "compilerOptions": {
-    "strict": true
+    "strict": true,
+    "jsx": "react",
+    "module": "esnext",
+    "baseUrl": ".",
+    "paths": {
+      "react-native-maps": ["node_modules/react-native-maps"]
+    }
   }
 }
