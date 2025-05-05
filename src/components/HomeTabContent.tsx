@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, JSX } from 'react';
 import { 
   View, 
   Text, 
@@ -12,7 +12,7 @@ import {
   PanResponder,
   Alert
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 
 
 import type { TabType, SuggestionItem } from '../types/index'; 
@@ -70,7 +70,7 @@ const HomeTabContent: React.FC<HomeTabContentProps> = ({
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [localSuggestions, setLocalSuggestions] = React.useState<SuggestionItem[]>([]);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | undefined>(undefined);
   const [currentLocation, setCurrentLocation] = React.useState<{ latitude: number; longitude: number }| null>(null);
   const [searchTimestamps, setSearchTimestamps] = React.useState<{ [key: number]: Date }>({});
 
