@@ -50,7 +50,7 @@ import AdminDashboard from 'src/pages/AdminDashboard';
 import DriverDashboard from 'src/pages/DriverDashboard';
 import Register from 'src/pages/Register';
 import WelcomeScreen from './src/pages/WelcomeScreen';
-
+import { faHome, faScrewdriverWrench, faClipboardList, faUser} from '@fortawesome/free-solid-svg-icons';
 
 // Configurações responsivas
 const { width, height } = Dimensions.get('window');
@@ -615,7 +615,7 @@ export default function App() {
                   <NavigationButton
                     page="Home"
                     label="Home"
-                    icon="home"
+                    icon={faHome}
                     activePage={activePage}
                     theme={theme}
                     onPress={() => setActivePage('Home')}
@@ -623,7 +623,7 @@ export default function App() {
                   <NavigationButton
                     page="Serviços"
                     label="Serviços"
-                    icon="tools"
+                    icon={faScrewdriverWrench}
                     activePage={activePage}
                     theme={theme}
                     onPress={() => setActivePage('Serviços')}
@@ -631,7 +631,7 @@ export default function App() {
                   <NavigationButton
                     page="Atividade"
                     label="Atividade"
-                    icon="clipboard-list"
+                    icon={faClipboardList}
                     activePage={activePage}
                     theme={theme}
                     onPress={() => setActivePage('Atividade')}
@@ -639,7 +639,7 @@ export default function App() {
                   <NavigationButton
                     page="Conta"
                     label="Conta"
-                    icon="account"
+                    icon={faUser}
                     activePage={activePage}
                     theme={theme}
                     onPress={() => setActivePage('Conta')}

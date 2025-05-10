@@ -1,11 +1,12 @@
 import React from 'react';
 import { View, Text, FlatList } from 'react-native';
 import ServiceCard from '../components/ServiceCard';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
 // Tipo do objeto de serviço
 export interface ServiceItem {
   id: string;
-  icon: string;
+  icon: IconDefinition;
   title: string;
   description: string;
   color: string;

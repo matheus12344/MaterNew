@@ -2,6 +2,7 @@ import React from 'react';
 import { TouchableOpacity, Text, View } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ServiceItem } from '../pages/ServicesScreen';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 interface ServiceCardProps {
   service: ServiceItem;
@@ -24,7 +25,7 @@ const ServiceCard: React.FC<ServiceCardProps> = ({
       onPress={onPress}
     >
       <View style={[styles.serviceIconContainer, { backgroundColor: service.color + '20' }]}>
-        <Ionicons name={service.icon as any} size={scale(28)} color={service.color} />
+        <FontAwesomeIcon icon={service.icon as any} size={scale(28)} color={service.color} />
       </View>
       <Text style={[styles.serviceTitle, { color: colors.text }]}>
         {service.title}

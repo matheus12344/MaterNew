@@ -13,6 +13,8 @@ import {
   Alert
 } from 'react-native';
 import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome'
+import { faHouse } from '@fortawesome/free-solid-svg-icons'
 
 
 import type { TabType, SuggestionItem } from '../types/index'; 

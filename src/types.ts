@@ -1,3 +1,5 @@
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+
 export type PageType = 
   | 'Welcome'
   | 'Login'
@@ -34,7 +36,7 @@ export interface ActivityItem {
   description: string;
   date: Date;
   status: 'completed' | 'pending' | 'cancelled';
-  icon: string;
+  icon: IconDefinition;
   price?: number;
   serviceId?: string;
   vehicle?: {
@@ -55,7 +57,7 @@ export interface ServiceItem {
   id: string;
   title: string;
   description: string;
-  icon: string;
+  icon: IconDefinition;
   color: string;
   price?: number;
   distance?: number;

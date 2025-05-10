@@ -17,6 +17,8 @@ import SmartFeaturesService from '../services/SmartFeaturesService';
 import { scale } from 'react-native-size-matters';
 import { useTheme } from 'src/context/ThemeContext';
 import * as Notifications from 'expo-notifications';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 // Configurar o comportamento das notificações
 Notifications.setNotificationHandler({
@@ -24,12 +26,14 @@ Notifications.setNotificationHandler({
     shouldShowAlert: true,
     shouldPlaySound: true,
     shouldSetBadge: true,
+    shouldShowBanner: true,
+    shouldShowList: true
   }),
 });
 
 export interface ServiceItem {
   id: string;
-  icon: string;
+  icon: IconDefinition;
   title: string;
   description: string;
   color: string;
@@ -504,12 +508,9 @@ const ServiceDetailScreen: React.FC<ServiceDetailScreenProps> = ({
 
       {/* Área de destaque do serviço (Hero) */}
       <View style={[styles.detailHeroContainer, { backgroundColor: service.color }]}>
-        <Ionicons 
-          name={service.icon as any} 
-          size={scale(60)} 
-          color="#fff" 
-          style={styles.detailHeroIcon} 
-        />
+        <View style={[localStyles.serviceIconContainer, { backgroundColor: service.color + '20' }]}>
+          <FontAwesomeIcon icon={service.icon} size={scale(45)} color={'white'} />
+        </View>
         <Text style={[styles.detailHeroTitle, { color: '#fff' }]}>
           {service.title}
         </Text>
@@ -784,7 +785,13 @@ const localStyles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '500',
   },
-
+  serviceIconContainer: {
+    width: scale(60),
+    height: scale(60),
+    borderRadius: scale(30),
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
 });
 
 export default ServiceDetailScreen;

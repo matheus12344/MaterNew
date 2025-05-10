@@ -1,3 +1,5 @@
+import { IconDefinition } from "@fortawesome/fontawesome-svg-core";
+
 // Tipos e interfaces
 type TabType = 'Viagem' | 'Serviços' | 'Atividade' | 'Conta';
 type PageType =
@@ -75,15 +77,16 @@ interface ActivityItem {
     };
   };
   price?: number;
+  icon: IconDefinition;
 }
   
-  interface ServiceItem {
-    id: string;
-    icon: string;
-    title: string;
-    description: string;
-    color: string;
-  }
+interface ServiceItem {
+  id: string;
+  icon: IconDefinition;
+  title: string;
+  description: string;
+  color: string;
+}
   
 interface SuggestionItem {
     id: number;
@@ -98,117 +101,107 @@ interface SuggestionItem {
     color: string // Added color property
 }
   
-  interface ActivityItem {
-    id: string;
-    date: Date;
-    title: string;
-    description: string;
-    status: 'completed' | 'pending' | 'cancelled';
-    price?: number;
-    icon: string;
-  }
+interface UserData {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: 'admin' | 'user';
+  status: 'active' | 'inactive';
+  lastLogin: Date;
+  createdAt: Date;
+  profileImage: string;
+  vehicles: Vehicle[];
+  referralCode: string;
+}
   
-  interface UserData {
-    id: string;
-    name: string;
-    email: string;
-    phone: string;
-    role: 'admin' | 'user';
-    status: 'active' | 'inactive';
-    lastLogin: Date;
-    createdAt: Date;
-    profileImage: string;
-    vehicles: Vehicle[];
-    referralCode: string;
-  }
-  
-  interface Vehicle {
-    id: string;
-    model: string;
-    plate: string;
-    color: string;
-  }
+interface Vehicle {
+  id: string;
+  model: string;
+  plate: string;
+  color: string;
+}
 
-  // Criando interface para o algoritmo de precificação
-  type ServicePricing = {
-    id: string;
-    baseRate: number;
-    perKm: number;
-    minimumKm: number;
-    description: string;
-    formula: string;
-  };
+// Criando interface para o algoritmo de precificação
+type ServicePricing = {
+  id: string;
+  baseRate: number;
+  perKm: number;
+  minimumKm: number;
+  description: string;
+  formula: string;
+};
 
-  type Coordinates = {
-    latitude: number;
-    longitude: number;
-  };
+type Coordinates = {
+  latitude: number;
+  longitude: number;
+};
 
-  //Criando a interface para navegação
-  type RootStackParamList = {
-    Map: { route: string; services: any }; 
-    Payment: {
-      service: string;
-      amount: number;
-      serviceDetails: {
-        pickup: Coordinates;
-        destination: Coordinates;
-        distance: number;
-        coordinates: Coordinates[];
-        vehicleType: string;
-      };
+//Criando a interface para navegação
+type RootStackParamList = {
+  Map: { route: string; services: any }; 
+  Payment: {
+    service: string;
+    amount: number;
+    serviceDetails: {
+      pickup: Coordinates;
+      destination: Coordinates;
+      distance: number;
+      coordinates: Coordinates[];
+      vehicleType: string;
     };
-    Home: {
-      selectedTab: string;
-      setSelectedTab: (tab: string) => void;
-      styles: any;
-      colors: any;
-      theme: Theme;
-    };
-    Services: {
-      services: any[];
-      handleServiceSelect: (service: any) => void;
-      styles: any;
-      colors: any;
-      scale: number;
-    };
-    Profile: {
-      userData: any;
-      setUserData: (data: any) => void;
-      styles: any;
-      colors: any;
-      theme: Theme;
-    };
-    AdminDashboard: undefined;
-    AdminUsers: undefined;
-    AdminServices: {
-      onServiceUpdate: (service: any) => void;
-    };
-    AdminAnalytics: undefined;
-    AdminNotifications: undefined;
-    AdminSystemSettings: undefined;
-    ServiceDetails: {
-      service: any;
-      onChat: () => void;
-      onBack: () => void;
-      styles: any;
-      colors: any;
-      theme: Theme;
-    };
-    Login: undefined;
-    AdminTabs: undefined;
-    UserTabs: undefined;
   };
+  Home: {
+    selectedTab: string;
+    setSelectedTab: (tab: string) => void;
+    styles: any;
+    colors: any;
+    theme: Theme;
+  };
+  Services: {
+    services: any[];
+    handleServiceSelect: (service: any) => void;
+    styles: any;
+    colors: any;
+    scale: number;
+  };
+  Profile: {
+    userData: any;
+    setUserData: (data: any) => void;
+    styles: any;
+    colors: any;
+    theme: Theme;
+  };
+  AdminDashboard: undefined;
+  AdminUsers: undefined;
+  AdminServices: {
+    onServiceUpdate: (service: any) => void;
+  };
+  AdminAnalytics: undefined;
+  AdminNotifications: undefined;
+  AdminSystemSettings: undefined;
+  ServiceDetails: {
+    service: any;
+    onChat: () => void;
+    onBack: () => void;
+    styles: any;
+    colors: any;
+    theme: Theme;
+  };
+  Login: undefined;
+  AdminTabs: undefined;
+  UserTabs: undefined;
+};
   
   
-  interface NavigationButtonProps {
-    page: PageType;
-    label: string;
-    icon: string;
-    activePage: PageType;
-    theme: 'light' | 'dark';
-    onPress: () => void;
-  }
+interface NavigationButtonProps {
+  page: PageType;
+  label: string;
+  icon: string;
+  activePage: PageType;
+  theme: 'light' | 'dark';
+  onPress: () => void;
+}
   
 
 export type { 

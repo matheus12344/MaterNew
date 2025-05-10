@@ -3,12 +3,14 @@ import { Animated, Text, TouchableWithoutFeedback } from 'react-native';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useTheme } from '../context/ThemeContext';
 import { scale } from 'react-native-size-matters';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 
 // Ajuste o tipo PageType conforme sua estrutura, se estiver usando TypeScript.
 interface NavigationButtonProps {
   page: string;
   label: string;
-  icon: string;
+  icon: IconDefinition;
   activePage: string;
   theme: 'light' | 'dark';
   onPress: () => void;
@@ -59,8 +61,8 @@ const NavigationButton: React.FC<NavigationButtonProps> = ({
         accessibilityRole="button"
         accessibilityLabel={`Navegar para ${label}`}
       >
-        <MaterialCommunityIcons
-          name={icon as any}
+        <FontAwesomeIcon
+          icon={icon as any}
           size={scale(24)}
           color={isActive ? colors.primary : colors.text}
         />
