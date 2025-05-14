@@ -3,6 +3,7 @@ import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 
 import { ActivityItem } from '../types';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 
 interface ActivityDetailScreenProps {
   activity: ActivityItem;
@@ -65,7 +66,7 @@ const ActivityDetailScreen: React.FC<ActivityDetailScreenProps> = ({
       {/* Hero / Destaque */}
       <View style={localStyles.heroContainer}>
         <View style={[localStyles.iconContainer, { backgroundColor: colors.card }]}>
-          <Ionicons name={activity.icon as any} size={scale(48)} color={colors.text} />
+          <FontAwesomeIcon icon={activity.icon as any} size={scale(48)} color={colors.text} />
         </View>
         <Text style={[localStyles.title, { color: colors.text }]}>
           {activity.title}

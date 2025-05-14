@@ -56,6 +56,7 @@ type ServiceDetailScreenProps = {
   colors: any;
   scale: (size: number) => number;
   userVehicles: Vehicle[];
+  onAddVehicle: () => void; // Adiciona a prop para abrir o modal de adicionar veículo
 };
 
 interface Workshop {
@@ -76,6 +77,7 @@ const ServiceDetailScreen: React.FC<ServiceDetailScreenProps> = ({
   scale,
   userVehicles,
   onBack,
+  onAddVehicle // Recebe a prop
 }) => {
   // Estado para controlar a visibilidade do modal
   const [requestModalVisible, setRequestModalVisible] = useState(false);
@@ -164,31 +166,46 @@ const ServiceDetailScreen: React.FC<ServiceDetailScreenProps> = ({
                 <Ionicons name="car" size={20} color={colors.primary} /> Veículo
               </Text>
               <View style={localStyles.vehicleSelector}>
-                {userVehicles.map(vehicle => (
+                {userVehicles.length === 0 ? (
                   <TouchableOpacity
-                    key={vehicle.id}
                     style={[
                       localStyles.vehicleOption,
-                      selectedVehicle?.id === vehicle.id && 
-                        { backgroundColor: colors.primary + '20', borderColor: colors.primary }
+                      { justifyContent: 'center', alignItems: 'center', borderStyle: 'dashed', borderColor: colors.primary }
                     ]}
-                    onPress={() => setSelectedVehicle(vehicle)}
+                    onPress={onAddVehicle}
                   >
-                    <Ionicons 
-                      name="car-sport" 
-                      size={24} 
-                      color={selectedVehicle?.id === vehicle.id ? colors.primary : colors.text} 
-                    />
-                    <View style={localStyles.vehicleInfo}>
-                      <Text style={[localStyles.vehicleModel, { color: colors.text }]}>
-                        {vehicle.model}
-                      </Text>
-                      <Text style={[localStyles.vehiclePlate, { color: colors.placeholder }]}>
-                        {vehicle.plate}
-                      </Text>
-                    </View>
+                    <Ionicons name="add-circle" size={32} color={colors.primary} />
+                    <Text style={{ color: colors.primary, marginTop: 8, fontWeight: '500' }}>
+                      Adicionar veículo
+                    </Text>
                   </TouchableOpacity>
-                ))}
+                ) : (
+                  userVehicles.map(vehicle => (
+                    <TouchableOpacity
+                      key={vehicle.id}
+                      style={[
+                        localStyles.vehicleOption,
+                        selectedVehicle?.id === vehicle.id && 
+                          { backgroundColor: colors.primary + '20', borderColor: colors.primary }
+                      ]}
+                      onPress={() => setSelectedVehicle(vehicle)}
+                    >
+                      <Ionicons 
+                        name="car-sport" 
+                        size={24} 
+                        color={selectedVehicle?.id === vehicle.id ? colors.primary : colors.text} 
+                      />
+                      <View style={localStyles.vehicleInfo}>
+                        <Text style={[localStyles.vehicleModel, { color: colors.text }]}>
+                          {vehicle.model}
+                        </Text>
+                        <Text style={[localStyles.vehiclePlate, { color: colors.placeholder }]}>
+                          {vehicle.plate}
+                        </Text>
+                      </View>
+                    </TouchableOpacity>
+                  ))
+                )}
               </View>
             </View>
 

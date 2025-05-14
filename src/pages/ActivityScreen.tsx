@@ -5,13 +5,17 @@ import { Ionicons } from '@expo/vector-icons';
 import { useActivities } from '../context/ActivityContext';
 import { LinearGradient } from 'expo-linear-gradient';
 import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import { Swipeable } from 'react-native-gesture-handler';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const AnimatedButton = Animated.createAnimatedComponent(TouchableOpacity);
 const AnimatedTouchable = Animated.createAnimatedComponent(TouchableOpacity);
 
+const STORAGE_KEY = 'mater_activities_history';
+
 interface ActivityScreenProps {
   activities: ActivityItem[];
-  renderActivityItem: ({ item }: { item: ActivityItem }) => JSX.Element;
+  renderActivityItem: ({ item }: { item: ActivityItem }) => React.ReactNode;
   styles: any;
   colors: any;
   handleActivityPress: (item: ActivityItem) => void;
@@ -27,67 +31,120 @@ const ActivityScreen: React.FC<ActivityScreenProps> = ({
   const { activities } = useActivities();
 
   const [filter, setFilter] = useState<string>('all');
+  const [localActivities, setLocalActivities] = useState<ActivityItem[]>(activities);
+
+  React.useEffect(() => {
+    // Carregar histórico salvo ao iniciar
+    const loadActivities = async () => {
+      try {
+        const saved = await AsyncStorage.getItem(STORAGE_KEY);
+        if (saved) {
+          setLocalActivities(JSON.parse(saved));
+        } else {
+          setLocalActivities(activities);
+        }
+      } catch (e) {
+        setLocalActivities(activities);
+      }
+    };
+    loadActivities();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  React.useEffect(() => {
+    // Salvar histórico sempre que localActivities mudar
+    AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(localActivities));
+  }, [localActivities]);
+
+  const handleComplete = (id: string) => {
+    setLocalActivities(prev => prev.map(act => act.id === id ? { ...act, status: 'completed' } : act));
+  };
+
+  const handleCancel = (id: string) => {
+    setLocalActivities(prev => prev.map(act => act.id === id ? { ...act, status: 'cancelled' } : act));
+  };
+
+  const renderRightActions = () => (
+    <View style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: '#4CAF50', flex: 1, borderRadius: 20 }}>
+      <Text style={{ color: 'white', fontWeight: 'bold', padding: 20 }}>Concluir</Text>
+    </View>
+  );
+
+  const renderLeftActions = () => (
+    <View style={{ justifyContent: 'center', alignItems: 'center', backgroundColor: '#FF5252', flex: 1, borderRadius: 20 }}>
+      <Text style={{ color: 'white', fontWeight: 'bold', padding: 20 }}>Cancelar</Text>
+    </View>
+  );
 
   const filteredActivities = useMemo(() => 
-    activities.filter(a => filter === 'all' ? true : a.status === filter), 
-    [activities, filter]
+    localActivities.filter(a => filter === 'all' ? true : a.status === filter), 
+    [localActivities, filter]
   );
 
   const renderActivityItem = ({ item }: { item: ActivityItem }) => (
-    <TouchableOpacity style={[styles.activityCard, { backgroundColor: colors.card }]} onPress={() => handleActivityPress(item)}>
-      <View style={styles.activityHeader}>
-      <Ionicons 
-        name={item.status === 'completed' ? 'checkmark-circle' : 'time'} 
-        color={getStatusColor(item.status).text} 
-        size={20} 
-      />
-      <Text style={[styles.activityDate, {color: colors.placeholder}]}>
-        {new Date(item.date).toLocaleDateString('pt-BR', {
-        day: '2-digit',
-        month: 'short',
-        year: 'numeric',
-        hour: '2-digit',
-        minute: '2-digit'
-        })}
-      </Text>
-      <View style={[styles.statusBadge, {backgroundColor: getStatusColor(item.status).bg || colors.defaultBg}]}>
-        <Text style={[styles.statusText, {color: getStatusColor(item.status).text || colors.text}]}>
-        {translateStatus(item.status)}
+    <Swipeable
+      renderRightActions={renderRightActions}
+      onSwipeableRightOpen={() => handleComplete(item.id)}
+      renderLeftActions={renderLeftActions}
+      onSwipeableLeftOpen={() => handleCancel(item.id)}
+      overshootRight={false}
+      overshootLeft={false}
+    >
+      <TouchableOpacity style={[styles.activityCard, { backgroundColor: colors.card }]} onPress={() => handleActivityPress(item)}>
+        <View style={styles.activityHeader}>
+          <Ionicons 
+            name={item.status === 'completed' ? 'checkmark-circle' : 'time'} 
+            color={getStatusColor(item.status).text} 
+            size={20} 
+          />
+          <Text style={[styles.activityDate, {color: colors.placeholder}]}>
+            {new Date(item.date).toLocaleDateString('pt-BR', {
+              day: '2-digit',
+              month: 'short',
+              year: 'numeric',
+              hour: '2-digit',
+              minute: '2-digit'
+            })}
+          </Text>
+          <View style={[styles.statusBadge, {backgroundColor: getStatusColor(item.status).bg || colors.defaultBg}]}>
+            <Text style={[styles.statusText, {color: getStatusColor(item.status).text || colors.text}]}>
+              {translateStatus(item.status)}
+            </Text>
+          </View>
+        </View>
+        
+        <Text style={[styles.activityTitle, {color: colors.text}]}>{item.title}</Text>
+        <Text style={[styles.activityDescription, {color: colors.placeholder}]}>
+          {item.description}
         </Text>
-      </View>
-      </View>
-      
-      <Text style={[styles.activityTitle, {color: colors.text}]}>{item.title}</Text>
-      <Text style={[styles.activityDescription, {color: colors.placeholder}]}>
-      {item.description}
-      </Text>
-      
-      <View style={styles.detailRow}>
-      <Ionicons name="car" size={16} color="#666" />
-      <Text style={styles.detailText}>
-        {item.vehicle.model} ({item.vehicle.plate})
-      </Text>
-      </View>
-      
-      <View style={styles.detailRow}>
-      <Ionicons name="location" size={16} color="#666" />
-      <Text style={styles.detailText}>
-        {item.location.address || 'Local não especificado'}
-      </Text>
-      </View>
-      
-      {item.price && (
-      <View style={styles.priceContainer}>
-        <Ionicons name="cash" size={16} color="#666" />
-        <Text style={[styles.priceLabel, {color: colors.text}]}>Valor:</Text>
-        <Text style={[styles.priceValue, {color: colors.primary}]}>
-        R$ {item.price.toFixed(2)}
-        </Text>
-      </View>
-      )}
-    </TouchableOpacity>
+        
+        <View style={styles.detailRow}>
+          <Ionicons name="car" size={16} color="#666" />
+          <Text style={styles.detailText}>
+            {item.vehicle ? `${item.vehicle.model} (${item.vehicle.plate})` : 'Veículo não especificado'}
+          </Text>
+        </View>
+        
+        <View style={styles.detailRow}>
+          <Ionicons name="location" size={16} color="#666" />
+          <Text style={styles.detailText}>
+            {item.location?.address || 'Local não especificado'}
+          </Text>
+        </View>
+        
+        {item.price && (
+          <View style={styles.priceContainer}>
+            <Ionicons name="cash" size={16} color="#666" />
+            <Text style={[styles.priceLabel, {color: colors.text}]}>Valor:</Text>
+            <Text style={[styles.priceValue, {color: colors.primary}]}>
+              R$ {item.price.toFixed(2)}
+            </Text>
+          </View>
+        )}
+      </TouchableOpacity>
+    </Swipeable>
   );
-  // Dentro do componente:
+
   const scale = useSharedValue(1);
 
   const animatedStyle = useAnimatedStyle(() => ({
@@ -110,6 +167,7 @@ const ActivityScreen: React.FC<ActivityScreenProps> = ({
       <Text style={{ color: colors.text, marginLeft: 8 }}>{label}</Text>
     </AnimatedTouchable>
   );
+
   const handlePressIn = () => {
     scale.value = withSpring(0.95);
   };
@@ -129,9 +187,10 @@ const ActivityScreen: React.FC<ActivityScreenProps> = ({
     // Lógica de atualização
     setRefreshing(false);
   };
+
   return (
     <FlatList
-      data={activities}
+      data={filteredActivities}
       renderItem={renderActivityItem}
       keyExtractor={(item) => item.id}
       contentContainerStyle={styles.activityContainer}
@@ -149,13 +208,11 @@ const ActivityScreen: React.FC<ActivityScreenProps> = ({
               <Text style={{ color: colors.text }}>Ordenar por data</Text>
             </TouchableOpacity>
 
-            {/* Adicionando botões de filtro */}
             <FilterButton 
               icon="filter" 
               label="Filtrar" 
               onPress={() => setFilter('all')} 
             />
-
           </View>
         </View>
       }
@@ -197,7 +254,7 @@ function getStatusColor(status: string): { bg: string, text: string } {
       return { bg: 'green', text: 'white' };
     case 'pending':
       return { bg: 'orange', text: 'black' };
-    case 'canceled':
+    case 'cancelled':
       return { bg: 'red', text: 'white' };
     default:
       return { bg: 'gray', text: 'black' };
@@ -210,7 +267,7 @@ function translateStatus(status: string): string {
       return 'Concluído';
     case 'pending':
       return 'Pendente';
-    case 'canceled':
+    case 'cancelled':
       return 'Cancelado';
     default:
       return 'Desconhecido';

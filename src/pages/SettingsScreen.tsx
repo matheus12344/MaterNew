@@ -138,12 +138,6 @@ const SettingsScreen: React.FC<SettingsScreenProps> = ({ styles, colors, scale, 
       title: 'Política de Privacidade',
       action: openPrivacyPolicy,
     },
-    {
-      id: '6',
-      icon: 'log-out',
-      title: 'Sair',
-      action: handleLogout,
-    },
   ]
 
   

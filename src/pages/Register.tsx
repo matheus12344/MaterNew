@@ -103,7 +103,7 @@ const Register = ({ setActivePage }: RegisterProps) => {
 
       await AsyncStorage.setItem('userData', JSON.stringify(userData));
       Alert.alert('Sucesso', 'Cadastro realizado com sucesso!');
-      setActivePage('Login');
+      setActivePage('Home'); // Garante navegação para Home
     } catch (error) {
       console.error('Erro ao cadastrar:', error);
       Alert.alert('Erro', 'Não foi possível realizar o cadastro. Tente novamente.');
@@ -414,4 +414,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default Register; 
+export default Register;

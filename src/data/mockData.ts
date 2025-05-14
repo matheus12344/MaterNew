@@ -133,8 +133,7 @@ export const mockAccountData: accountOptions = [
   { id: '2', icon: 'shield-checkmark', title: 'Privacidade', screen: 'Privacy' },
   { id: '3', icon: 'card', title: 'Pagamentos', screen: 'Payments' },
   { id: '4', icon: 'help-circle', title: 'Ajuda', screen: 'Help' },
-  { id: '5', icon: 'log-out', title: 'Sair', screen: 'Logout' },
-  { id: '6', icon: 'person', title: 'Indicar Amigos', screen: 'Referral'}
+  { id: '5', icon: 'person', title: 'Indicar Amigos', screen: 'Referral'}
 ];
 
 export const mockCommunityPosts: CommunityPost[] = [

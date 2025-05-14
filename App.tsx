@@ -51,6 +51,7 @@ import DriverDashboard from 'src/pages/DriverDashboard';
 import Register from 'src/pages/Register';
 import WelcomeScreen from './src/pages/WelcomeScreen';
 import { faHome, faScrewdriverWrench, faClipboardList, faUser} from '@fortawesome/free-solid-svg-icons';
+import { GestureHandlerRootView } from 'react-native-gesture-handler';
 
 // Configurações responsivas
 const { width, height } = Dimensions.get('window');
@@ -99,9 +100,21 @@ export default function App() {
   const services = mockServices;
   const activities = mockActivities;
   const accountOptions = mockAccountData;
-  const suggestions = mockSuggestions
+  const suggestions = mockSuggestions;
 
-  // Carregar dados do usuário do AsyncStorage
+  // Estado para controlar abertura automática do modal de adicionar veículo
+  const [openAddVehicleOnMount, setOpenAddVehicleOnMount] = useState(false);
+
+  // Estado para controlar se o app está carregando o usuário
+  const [loadingUser, setLoadingUser] = useState(true);
+
+  // Função para ser passada ao ServiceDetailScreen
+  const handleAddVehicleFromService = () => {
+    setActivePage('Conta');
+    setOpenAddVehicleOnMount(true);
+  };
+
+  // Carregar dados do usuário do AsyncStorage e definir página inicial
   useEffect(() => {
     const loadUserData = async () => {
       try {
@@ -109,14 +122,25 @@ export default function App() {
         if (storedUserData) {
           const parsedData = JSON.parse(storedUserData);
           setUserData(parsedData);
+          setActivePage('Home'); // Vai direto para Home se usuário existe
+        } else {
+          setActivePage('Welcome');
         }
       } catch (error) {
-        console.error('Erro ao carregar dados do usuário:', error);
-        Alert.alert('Erro', 'Não foi possível carregar os dados do perfil');
+        setActivePage('Welcome');
+      } finally {
+        setLoadingUser(false);
       }
     };
     loadUserData();
   }, []);
+
+  // Sempre que userData mudar, salva no AsyncStorage (exceto se for logout)
+  useEffect(() => {
+    if (userData && userData.email) {
+      AsyncStorage.setItem('userData', JSON.stringify(userData));
+    }
+  }, [userData]);
 
   const fetchOSMSuggestions = async (searchText: string): Promise<SuggestionItem[]> => {
     try {
@@ -404,6 +428,14 @@ export default function App() {
   };
 
   const renderContent = () => {
+    if (loadingUser) {
+      return (
+        <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: colors.background }}>
+          <Text style={{ color: colors.text, fontSize: 18 }}>Carregando...</Text>
+        </View>
+      );
+    }
+
     switch (activePage) {
       case 'Welcome':
         return <WelcomeScreen setActivePage={setActivePage} />;
@@ -478,6 +510,8 @@ export default function App() {
             renderAccountOption={renderAccountOption}
             onOptionSelect={handleOptionSelect}
             onVehicleSelect={handleVehicleSelect}
+            openAddVehicleOnMount={openAddVehicleOnMount}
+            setOpenAddVehicleOnMount={setOpenAddVehicleOnMount}
           />
         );
       case 'DetalhesServiço':
@@ -491,6 +525,7 @@ export default function App() {
               colors={colors}
               scale={scale}
               userVehicles={userData.vehicles}
+              onAddVehicle={handleAddVehicleFromService}
             />
           )
         );
@@ -585,7 +620,7 @@ export default function App() {
       case 'SeguroPro':
         return <SeguroPro onBack={() => setActivePage('Conta')} />;
       case 'AdminDashboard':
-        return <AdminDashboard />;
+        return <AdminDashboard  handleHome={handleBackHome}/>;
       case 'DriverDashboard':
         return <DriverDashboard />;
       case 'Register':
@@ -600,57 +635,59 @@ export default function App() {
   };
 
   return (
-    <SafeAreaProvider>
-      <AccessibilityProvider>
-        <ThemeProvider>
-          <ActivityProvider>
-            <AuthProvider> 
-            <View style={[styles.container, { backgroundColor: colors.background }]}>
-              <StatusBar style={theme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} />
+    <GestureHandlerRootView style={{ flex: 1 }}>
+      <SafeAreaProvider>
+        <AccessibilityProvider>
+          <ThemeProvider>
+            <ActivityProvider>
+              <AuthProvider> 
+                <View style={[styles.container, { backgroundColor: colors.background }]}>
+                  <StatusBar style={theme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} />
 
-              {renderContent()}
+                  {renderContent()}
 
-              {activePage !== 'Login' && activePage !== 'Register' && activePage !== 'Welcome' && (
-                <View style={[styles.footer, { borderTopColor: colors.border }]}>
-                  <NavigationButton
-                    page="Home"
-                    label="Home"
-                    icon={faHome}
-                    activePage={activePage}
-                    theme={theme}
-                    onPress={() => setActivePage('Home')}
-                  />
-                  <NavigationButton
-                    page="Serviços"
-                    label="Serviços"
-                    icon={faScrewdriverWrench}
-                    activePage={activePage}
-                    theme={theme}
-                    onPress={() => setActivePage('Serviços')}
-                  />
-                  <NavigationButton
-                    page="Atividade"
-                    label="Atividade"
-                    icon={faClipboardList}
-                    activePage={activePage}
-                    theme={theme}
-                    onPress={() => setActivePage('Atividade')}
-                  />
-                  <NavigationButton
-                    page="Conta"
-                    label="Conta"
-                    icon={faUser}
-                    activePage={activePage}
-                    theme={theme}
-                    onPress={() => setActivePage('Conta')}
-                  />
+                  {activePage !== 'Login' && activePage !== 'Register' && activePage !== 'Welcome' && activePage !== 'AdminDashboard' && (
+                    <View style={[styles.footer, { borderTopColor: colors.border }]}>
+                      <NavigationButton
+                        page="Home"
+                        label="Home"
+                        icon={faHome}
+                        activePage={activePage}
+                        theme={theme}
+                        onPress={() => setActivePage('Home')}
+                      />
+                      <NavigationButton
+                        page="Serviços"
+                        label="Serviços"
+                        icon={faScrewdriverWrench}
+                        activePage={activePage}
+                        theme={theme}
+                        onPress={() => setActivePage('Serviços')}
+                      />
+                      <NavigationButton
+                        page="Atividade"
+                        label="Atividade"
+                        icon={faClipboardList}
+                        activePage={activePage}
+                        theme={theme}
+                        onPress={() => setActivePage('Atividade')}
+                      />
+                      <NavigationButton
+                        page="Conta"
+                        label="Conta"
+                        icon={faUser}
+                        activePage={activePage}
+                        theme={theme}
+                        onPress={() => setActivePage('Conta')}
+                      />
+                    </View>
+                  )}
                 </View>
-              )}
-            </View>
-            </AuthProvider>
-          </ActivityProvider>
-        </ThemeProvider>
-      </AccessibilityProvider>
-    </SafeAreaProvider>
+              </AuthProvider>
+            </ActivityProvider>
+          </ThemeProvider>
+        </AccessibilityProvider>
+      </SafeAreaProvider>
+    </GestureHandlerRootView>
   );
 }

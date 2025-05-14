@@ -63,6 +63,8 @@ interface AccountScreenProps {
   renderAccountOption: ({ item }: { item: { id: string; title: string; icon: string; screen: string; } }) => React.ReactElement;
   onOptionSelect: (screen: string) => void;
   onVehicleSelect: (vehicle: Vehicle) => void;
+  openAddVehicleOnMount?: boolean;
+  setOpenAddVehicleOnMount?: (value: boolean) => void;
 }
 
 const AccountScreen: React.FC<AccountScreenProps> = ({
@@ -75,7 +77,9 @@ const AccountScreen: React.FC<AccountScreenProps> = ({
   renderVehicleItem,
   renderAccountOption,
   onOptionSelect,
-  onVehicleSelect
+  onVehicleSelect,
+  openAddVehicleOnMount,
+  setOpenAddVehicleOnMount
 }) => {
 
   // Modais de edição
@@ -167,6 +171,14 @@ const AccountScreen: React.FC<AccountScreenProps> = ({
     };
     loadSmartFeatures();
   }, [userData.vehicles]);
+
+  // Abrir modal de adicionar veículo automaticamente se solicitado
+  useEffect(() => {
+    if (openAddVehicleOnMount) {
+      handleOpenAddVehicle();
+      if (setOpenAddVehicleOnMount) setOpenAddVehicleOnMount(false);
+    }
+  }, [openAddVehicleOnMount]);
 
   // Função para salvar dados do usuário
   const saveUserData = async (data: UserData) => {
@@ -354,6 +366,19 @@ const AccountScreen: React.FC<AccountScreenProps> = ({
   // Substituir o handleOptionSelect existente
   const handleOptionSelect = (screen: string) => {
     onOptionSelect(screen);
+  };
+
+  // Função de logout
+  const handleLogout = async () => {
+    try {
+      await AsyncStorage.removeItem('userData');
+      setUserData({ name: '', email: '', profileImage: '', vehicles: [] });
+      if (typeof onOptionSelect === 'function') {
+        onOptionSelect('Welcome');
+      }
+    } catch (error) {
+      Alert.alert('Erro', 'Não foi possível sair da conta.');
+    }
   };
 
   // Estilos locais que dependem de colors
@@ -773,6 +798,24 @@ const AccountScreen: React.FC<AccountScreenProps> = ({
           scrollEnabled={false}
           contentContainerStyle={styles.optionsList}
         />
+
+        {/* Botão de Logout */}
+        <View style={{ alignItems: 'center', marginVertical: 24 }}>
+          <TouchableOpacity
+            style={{
+              backgroundColor: colors.primary,
+              paddingVertical: 12,
+              paddingHorizontal: 32,
+              borderRadius: 8,
+              flexDirection: 'row',
+              alignItems: 'center',
+            }}
+            onPress={handleLogout}
+          >
+            <Ionicons name="log-out-outline" size={22} color="#fff" style={{ marginRight: 8 }} />
+            <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 16 }}>Sair</Text>
+          </TouchableOpacity>
+        </View>
 
         {/* MODAL: Editar Perfil */}
         <Modal

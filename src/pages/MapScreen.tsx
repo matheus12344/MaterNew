@@ -15,6 +15,7 @@ type Coordinates = {
   longitude: number;
 };
 import { servicePricing } from 'src/config/Pricing';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
 LogBox.ignoreLogs(['Setting a timer']);
 
 interface RouteParams {
@@ -34,7 +35,7 @@ interface MapScreenProps {
 
 const MapScreen: React.FC<MapScreenProps> = ({route, services, onSearchTextChange, onSelectSuggestion, onServiceSelect}) => {
   const { colors, theme } = useTheme();
-  const mapRef = useRef<MapView>(null);
+  const mapRef = useRef<MapView>(null) as React.RefObject<MapView>;
   const [region, setRegion] = useState({
     latitude: 0,
     longitude: 0,
@@ -53,7 +54,7 @@ const MapScreen: React.FC<MapScreenProps> = ({route, services, onSearchTextChang
   const [showSuggestions, setShowSuggestions] = React.useState(false);
   const [isLoading, setIsLoading] = React.useState(false);
   const [localSuggestions, setLocalSuggestions] = React.useState<SuggestionItem[]>([]);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   
 
   useEffect(() => {
@@ -460,7 +461,7 @@ const MapScreen: React.FC<MapScreenProps> = ({route, services, onSearchTextChang
         }}
       >
         <View style={styles.serviceHeader}>
-          <Ionicons name={service.icon as any} size={24} color={service.color} />
+          <FontAwesomeIcon icon={service.icon as any} size={24} color={service.color} />
           <Text style={[styles.serviceName, { color: colors.text }]}>{service.title}</Text>
           <Text style={[styles.servicePrice, { color: 'black' }]}>
             {new Intl.NumberFormat('pt-BR', {

@@ -12,6 +12,9 @@ import { Ionicons } from '@expo/vector-icons';
 import { LineChart, BarChart, PieChart } from 'react-native-chart-kit';
 import { useTheme } from '../context/ThemeContext';
 import { ActivityItem, ServiceItem, UserData } from '../types';
+import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
+import { faHome } from '@fortawesome/free-solid-svg-icons';
+import { s, scale } from 'react-native-size-matters';
 
 const { width } = Dimensions.get('window');
 
@@ -30,7 +33,13 @@ interface ServiceAnalytics {
   revenue: number;
 }
 
-const AdminDashboard = () => {
+interface AdminDashboardProps {
+  handleHome: () => void;
+}
+
+const AdminDashboard: React.FC<AdminDashboardProps> = ({
+  handleHome
+}) => {
   const { theme, colors} = useTheme();
   const [stats, setStats] = useState<DashboardStats>({
     totalUsers: 0,
@@ -97,7 +106,7 @@ const AdminDashboard = () => {
           style={[
             styles.timeRangeButton,
             {
-              backgroundColor: selectedTimeRange === range ? colors.primary : colors.card,
+              backgroundColor: selectedTimeRange === range ? 'blue' : colors.card,
             },
           ]}
           onPress={() => setSelectedTimeRange(range)}
@@ -126,6 +135,11 @@ const AdminDashboard = () => {
     >
       <View style={styles.header}>
         <Text style={[styles.title, { color: colors.text }]}>Painel Administrativo</Text>
+        <TouchableOpacity onPress={handleHome}
+        style={{backgroundColor: 'blue', position: 'absolute', left: scale(300), height: scale(40), width: scale(40), justifyContent: 'center', alignItems: 'center', borderRadius: 20, top: 10}}>
+          <FontAwesomeIcon icon={faHome} size={scale(24)} color='white'/>
+        </TouchableOpacity>
+
         {renderTimeRangeSelector()}
       </View>
 
