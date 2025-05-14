@@ -32,6 +32,7 @@ const ActivityScreen: React.FC<ActivityScreenProps> = ({
 
   const [filter, setFilter] = useState<string>('all');
   const [localActivities, setLocalActivities] = useState<ActivityItem[]>(activities);
+  const [loadedFromStorage, setLoadedFromStorage] = useState(false);
 
   React.useEffect(() => {
     // Carregar histórico salvo ao iniciar
@@ -45,11 +46,26 @@ const ActivityScreen: React.FC<ActivityScreenProps> = ({
         }
       } catch (e) {
         setLocalActivities(activities);
+      } finally {
+        setLoadedFromStorage(true);
       }
     };
     loadActivities();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  React.useEffect(() => {
+    // Sempre que activities do contexto mudar e já carregou do storage,
+    // adiciona novas atividades que não existem ainda no localActivities
+    if (!loadedFromStorage) return;
+    setLocalActivities(prev => {
+      // Adiciona apenas atividades novas
+      const prevIds = prev.map(a => a.id);
+      const novas = activities.filter(a => !prevIds.includes(a.id));
+      if (novas.length === 0) return prev;
+      return [...prev, ...novas];
+    });
+  }, [activities, loadedFromStorage]);
 
   React.useEffect(() => {
     // Salvar histórico sempre que localActivities mudar
