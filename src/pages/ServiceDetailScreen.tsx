@@ -8,6 +8,10 @@ import {
   Modal,
   Alert,
   TextInput,
+  PanResponder,
+  Platform,
+  Animated,
+  Easing
 } from 'react-native';
 import { Ionicons } from '@expo/vector-icons';
 import { ActivityItem, Vehicle } from '../types';
@@ -16,20 +20,8 @@ import { useActivities } from '../context/ActivityContext';
 import SmartFeaturesService from '../services/SmartFeaturesService';
 import { scale } from 'react-native-size-matters';
 import { useTheme } from 'src/context/ThemeContext';
-import * as Notifications from 'expo-notifications';
 import { IconDefinition } from '@fortawesome/fontawesome-svg-core';
 import { FontAwesomeIcon } from '@fortawesome/react-native-fontawesome';
-
-// Configurar o comportamento das notificações
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowAlert: true,
-    shouldPlaySound: true,
-    shouldSetBadge: true,
-    shouldShowBanner: true,
-    shouldShowList: true
-  }),
-});
 
 export interface ServiceItem {
   id: string;
@@ -90,6 +82,86 @@ const ServiceDetailScreen: React.FC<ServiceDetailScreenProps> = ({
   const [nearbyWorkshops, setNearbyWorkshops] = useState<any[]>([]);
   const { addActivity } = useActivities();
   const smartFeaturesService = SmartFeaturesService.getInstance();
+
+  // Toast estilo Uber: mostra tempo de chegada e status do serviço
+  const [toast, setToast] = useState<{
+    visible: boolean;
+    message: string;
+    eta: number; // minutos
+    driver: string;
+    plate: string;
+    service: string;
+    totalEta?: number;
+  }>({ visible: false, message: '', eta: 0, driver: '', plate: '', service: '', totalEta: 0 });
+  const [toastInterval, setToastInterval] = useState<NodeJS.Timeout | null>(null);
+  const [toastDismissed, setToastDismissed] = useState(false);
+  const [progressAnim] = useState(new Animated.Value(1));
+  const [swipeAnim] = useState(new Animated.Value(0));
+
+  // PanResponder para swipe do toast
+  const panResponder = React.useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gestureState) => Math.abs(gestureState.dx) > 20,
+      onPanResponderMove: (_, gestureState) => {
+        swipeAnim.setValue(gestureState.dx);
+      },
+      onPanResponderRelease: (_, gestureState) => {
+        if (Math.abs(gestureState.dx) > 40) {
+          Animated.timing(swipeAnim, {
+            toValue: gestureState.dx > 0 ? 500 : -500,
+            duration: 300,
+            useNativeDriver: true,
+            easing: Easing.out(Easing.cubic)
+          }).start(() => {
+            setToast(t => ({ ...t, visible: false }));
+            setToastDismissed(true);
+            swipeAnim.setValue(0);
+            // Notificação local (simulada)
+            Alert.alert('Notificação', `Seu ${toast.service} ainda está a caminho!`);
+          });
+        } else {
+          Animated.spring(swipeAnim, { toValue: 0, useNativeDriver: true }).start();
+        }
+      },
+    })
+  ).current;
+
+  const showUberToast = (service: string, driver: string, plate: string, eta: number) => {
+    if (toastInterval) clearInterval(toastInterval);
+    setToast({
+      visible: true,
+      message: `Seu ${service} está a caminho!`,
+      eta,
+      driver,
+      plate,
+      service,
+      totalEta: eta
+    });
+    progressAnim.setValue(1);
+    // Barra de progresso animada
+    Animated.timing(progressAnim, {
+      toValue: 0,
+      duration: eta * 60000,
+      useNativeDriver: false
+    }).start();
+    // Atualiza o ETA a cada minuto
+    const interval = setInterval(() => {
+      setToast(prev => {
+        if (!prev.visible) return prev;
+        if (prev.eta <= 1) {
+          clearInterval(interval);
+          return { ...prev, eta: 0, visible: false };
+        }
+        return { ...prev, eta: prev.eta - 1 };
+      });
+    }, 60000);
+    setToastInterval(interval);
+    // Esconde o toast após o tempo estimado + 1 min
+    setTimeout(() => {
+      setToast(t => ({ ...t, visible: false }));
+      clearInterval(interval);
+    }, (eta + 1) * 60000);
+  };
 
   useEffect(() => {
     if (incidentLocation) {
@@ -372,94 +444,40 @@ const ServiceDetailScreen: React.FC<ServiceDetailScreenProps> = ({
         address: incidentLocation.address,
         coords: incidentLocation.coords
       },
-      // price: service.price, // Se aplicável
-      icon: service.icon // Add this line
+      icon: service.icon
     };
 
     addActivity(newActivity);
 
-    const serviceRequest = {
-      service: service.title,
-      date: new Date().toISOString(),
-      vehicle: {
-        model: selectedVehicle.model,
-        plate: selectedVehicle.plate,
-        color: selectedVehicle.color
-      },
-      location: incidentLocation,
-      status: 'pending'
-    };
-
-    console.log('Solicitação de Serviço:', JSON.stringify(serviceRequest, null, 2));
-    
-    // Exemplo de log formatado:
-    console.groupCollapsed('🚨 Nova Solicitação de Serviço');
-    console.log('⏰ Data/Hora:', new Date().toLocaleString());
-    console.log('🚗 Veículo:', `${selectedVehicle.model} (${selectedVehicle.plate})`);
-    console.log('📍 Local:', incidentLocation.address || 'Local não identificado');
-    console.log('📌 Coordenadas:', incidentLocation.coords);
-    console.log('🛠 Serviço:', service.title);
-    console.groupEnd();
-
-    setRequestModalVisible(false);
-    
-    // Gerar um tempo estimado aleatório entre 5 e 15 minutos
     const estimatedTime = Math.floor(Math.random() * 10) + 5;
-    
-    // Gerar um nome aleatório para o motorista
     const driverNames = ['João', 'Carlos', 'Pedro', 'Miguel', 'André', 'Lucas', 'Rafael', 'Bruno'];
     const randomDriverName = driverNames[Math.floor(Math.random() * driverNames.length)];
-    
-    // Gerar uma placa aleatória para o guincho
     const generateRandomPlate = () => {
       const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
       const numbers = '0123456789';
       let plate = '';
-      for (let i = 0; i < 3; i++) {
-        plate += letters.charAt(Math.floor(Math.random() * letters.length));
-      }
+      for (let i = 0; i < 3; i++) plate += letters.charAt(Math.floor(Math.random() * letters.length));
       plate += '-';
-      for (let i = 0; i < 4; i++) {
-        plate += numbers.charAt(Math.floor(Math.random() * numbers.length));
-      }
+      for (let i = 0; i < 4; i++) plate += numbers.charAt(Math.floor(Math.random() * numbers.length));
       return plate;
     };
-    
     const guinchoPlate = generateRandomPlate();
-    
-    // Solicitar permissão para enviar notificações
-    const { status } = await Notifications.requestPermissionsAsync();
-    if (status !== 'granted') {
-      Alert.alert(
-        'Permissão Negada',
-        'Precisamos de permissão para enviar notificações sobre o status do seu serviço.'
-      );
-      return;
-    }
-    
-    // Enviar notificação imediata
-    await Notifications.presentNotificationAsync({
-      title: 'Serviço Confirmado! 🚛',
-      body: `Seu guincho já está a caminho!\nMotorista: ${randomDriverName}\nPlaca: ${guinchoPlate}\nChegada em: ${estimatedTime} minutos`,
-      data: { service: service.title, vehicle: selectedVehicle.plate },
-    });
-    
-    // Mostrar alerta na tela
+
+    setRequestModalVisible(false);
+
+    // Toast estilo Uber
+    showUberToast(service.title, randomDriverName, guinchoPlate, estimatedTime);
+
+    // Modal de confirmação
     Alert.alert(
       'Serviço Confirmado! 🚛',
       `Seu guincho já está a caminho!\n\n` +
       `🚗 Motorista: ${randomDriverName}\n` +
       `🔢 Placa do Guincho: ${guinchoPlate}\n` +
       `⏱ Tempo estimado de chegada: ${estimatedTime} minutos\n\n` +
-      `Você receberá uma notificação quando o guincho estiver próximo.`,
+      `Você receberá uma mensagem na tela quando o guincho estiver próximo.`,
       [
-        {
-          text: 'OK',
-          onPress: () => {
-            // Aqui poderíamos adicionar uma navegação para uma tela de acompanhamento
-            // ou iniciar um timer para atualizar o status
-          }
-        }
+        { text: 'OK' }
       ]
     );
   };
@@ -595,6 +613,64 @@ const ServiceDetailScreen: React.FC<ServiceDetailScreenProps> = ({
 
       {/* MODAL de Confirmação de Solicitação */}
       {renderRequestModal(colors, service)}
+
+      {/* Toast visual estilo Uber */}
+      {toast.visible && !toastDismissed && (
+        <Animated.View
+          {...panResponder.panHandlers}
+          style={{
+            position: 'absolute',
+            bottom: 400,
+            left: 0,
+            right: 0,
+            alignItems: 'center',
+            zIndex: 9999,
+            transform: [{ translateX: swipeAnim }]
+          }}
+        >
+          <View style={{
+            backgroundColor: '#222',
+            borderRadius: 20,
+            paddingHorizontal: 28,
+            paddingVertical: 18,
+            flexDirection: 'row',
+            alignItems: 'center',
+            shadowColor: '#000',
+            shadowOpacity: 0.25,
+            shadowRadius: 10,
+            elevation: 8,
+            minWidth: 280,
+            maxWidth: 380
+          }}>
+            <Ionicons name="car-sport" size={32} color={colors.primary} style={{ marginRight: 16 }} />
+            <View style={{ flex: 1 }}>
+              <Text style={{ color: '#fff', fontWeight: 'bold', fontSize: 17, marginBottom: 2 }}>
+                {toast.message}
+              </Text>
+              <Text style={{ color: '#fff', fontSize: 15 }}>
+                Motorista: <Text style={{ color: colors.primary, fontWeight: 'bold' }}>{toast.driver}</Text> {'\u2022'} Placa: <Text style={{ color: colors.primary }}>{toast.plate}</Text>
+              </Text>
+              <Text style={{ color: '#fff', fontSize: 15, marginTop: 2 }}>
+                Chegada estimada em <Text style={{ color: colors.primary, fontWeight: 'bold' }}>{toast.eta}</Text> min
+              </Text>
+              <View style={{ height: 6, backgroundColor: '#444', borderRadius: 3, marginTop: 12, overflow: 'hidden' }}>
+                <Animated.View style={{
+                  height: 6,
+                  backgroundColor: colors.primary,
+                  borderRadius: 3,
+                  width: progressAnim.interpolate({
+                    inputRange: [0, 1],
+                    outputRange: ['0%', '100%']
+                  })
+                }} />
+              </View>
+              <Text style={{ color: '#aaa', fontSize: 12, marginTop: 6 }}>
+                Arraste para o lado para ocultar
+              </Text>
+            </View>
+          </View>
+        </Animated.View>
+      )}
     </ScrollView>
   );
 };
