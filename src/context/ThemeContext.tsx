@@ -1,8 +1,29 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { useColorScheme } from 'react-native';
 import { createStyles } from '../styles/theme';
-
+import { Theme } from 'src/types';
+import { lightTheme } from 'src/theme';
 interface ThemeContextType {
+  theme: 'light' | 'dark';
+  colors: {
+    background: string; 
+    primary: string;
+    primaryDark: string;
+    text: string;
+    card: string;
+    cardDark: string;
+    border: string;
+    placeholder: string;
+    success: string;
+  };
+  styles: ReturnType<typeof createStyles>;
+  toggleTheme: () => void;
+  scale: number;
+}
+
+interface ThemeContextData {
+  isDarkMode: boolean;
+  toggleTheme: () => void;
   theme: 'light' | 'dark';
   colors: {
     background: string;
@@ -16,10 +37,10 @@ interface ThemeContextType {
     success: string;
   };
   styles: ReturnType<typeof createStyles>;
-  toggleTheme: () => void;
+  scale: number;
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextData | undefined>(undefined);
 
 const colorSchemes = {
   light: {
@@ -51,7 +72,18 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
   const [theme, setTheme] = useState<'light' | 'dark'>(colorScheme || 'light');
   const colors = colorSchemes[theme];
   const styles = createStyles(theme);
+  const [isDarkMode, setIsDarkMode] = useState(false);
+  const scale = 1; // Valor padrão para scale
 
+  const darkTheme: Theme = {
+    ...lightTheme,
+    colors: {
+      ...lightTheme.colors,
+      background: '#000000',
+      text: '#FFFFFF',
+    },
+  };
+  
   const toggleTheme = () => {
     setTheme(prev => prev === 'light' ? 'dark' : 'light');
   };
@@ -61,7 +93,7 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({ children 
   }, [colorScheme]);
 
   return (
-    <ThemeContext.Provider value={{ theme, colors, styles, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, colors, styles, toggleTheme, isDarkMode: theme === 'dark', scale }}>
       {children}
     </ThemeContext.Provider>
   );

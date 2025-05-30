@@ -288,9 +288,13 @@ const HomeTabContent: React.FC<HomeTabContentProps> = ({
   };
 
   const getTimeAgo = (timestamp: Date) => {
-    const now = new Date();
-    const diffInMinutes = Math.floor((now.getTime() - timestamp.getTime()) / 60000);
-    return `${diffInMinutes} min atrás`;
+    const diff = Date.now() - timestamp.getTime();
+    const minutes = Math.floor(diff / 60000);
+    if (minutes < 60) return `${minutes} min atrás`;
+    const hours = Math.floor(minutes / 60);
+    if (hours < 24) return `${hours} h atrás`;
+    const days = Math.floor(hours / 24);
+    return `${days} d atrás`;
   };
 
     const renderTabButton = (tab: string) => {
@@ -486,7 +490,7 @@ const HomeTabContent: React.FC<HomeTabContentProps> = ({
             <FlatList
               data={history}
               renderItem={renderHistoryItem}
-              keyExtractor={(item, index) => index.toString()}
+              keyExtractor={(item, index) => `${item}-${index}`}
               scrollEnabled={false}
             />
           </>

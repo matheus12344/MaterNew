@@ -15,7 +15,6 @@ import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import ServiceRequestModal from '../components/ServiceRequestModal';
 import DriverSummaryModal from '../components/DriverSummaryModal';
 import RouteMapModal from '../components/RouteMapModal';
-import * as Notifications from 'expo-notifications';
 
 const { width } = Dimensions.get('window');
 
@@ -348,15 +347,6 @@ const DriverDashboard = () => {
   const [showRouteMap, setShowRouteMap] = useState(false);
 
   useEffect(() => {
-    // Configurar notificações
-    Notifications.setNotificationHandler({
-      handleNotification: async () => ({
-        shouldShowAlert: true,
-        shouldPlaySound: true,
-        shouldSetBadge: false,
-      }),
-    });
-
     return () => {
       if (intervalRef.current) {
         clearInterval(intervalRef.current);

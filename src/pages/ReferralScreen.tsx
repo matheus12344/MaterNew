@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
   View, 
   Text, 
@@ -16,16 +16,23 @@ import { mockUserData } from 'src/data/mockData';
 import { Ionicons } from '@expo/vector-icons';
 import { scale } from 'react-native-size-matters';
 import { LinearGradient } from 'expo-linear-gradient';
+import { generateReferralCode } from 'src/utils/referralCodeGenerator';
 
 const { width } = Dimensions.get('window');
 
 const ReferralScreen = () => {
   const { colors, styles: themeStyles } = useTheme();
-  const [referralCode] = useState(mockUserData.referralCode);
+  const [referralCode, setReferralCode] = useState('');
   const [copied, setCopied] = useState(false);
   const [shareCount, setShareCount] = useState(0);
   const fadeAnim = React.useRef(new Animated.Value(0)).current;
   
+  useEffect(() => {
+    // Gera um novo código de referência quando o componente é montado
+    const newReferralCode = generateReferralCode(mockUserData.id);
+    setReferralCode(newReferralCode);
+  }, []);
+
   React.useEffect(() => {
     Animated.timing(fadeAnim, {
       toValue: 1,

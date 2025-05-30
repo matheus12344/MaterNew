@@ -14,7 +14,7 @@ import {
 import { useTheme } from '../context/ThemeContext';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { PageType } from '../types';
-import { useAuth } from '../contexts/AuthContext';
+import { useAuth } from '../context/AuthContext';
 
 interface LoginProps {
   setActivePage: (page: PageType) => void;

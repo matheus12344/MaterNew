@@ -45,13 +45,14 @@ import SeguroProBenefits from './src/pages/SeguroProBenefits';
 import SeguroPro from './src/pages/SeguroPro';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import Login from 'src/pages/Login';
-import { AuthProvider, useAuth } from 'src/contexts/AuthContext';
+import { AuthProvider, useAuth } from 'src/context/AuthContext';
 import AdminDashboard from 'src/pages/AdminDashboard';
 import DriverDashboard from 'src/pages/DriverDashboard';
 import Register from 'src/pages/Register';
 import WelcomeScreen from './src/pages/WelcomeScreen';
 import { faHome, faScrewdriverWrench, faClipboardList, faUser} from '@fortawesome/free-solid-svg-icons';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
+import HomeScreen from 'src/pages/HomeScreen';
 
 // Configurações responsivas
 const { width, height } = Dimensions.get('window');
@@ -642,7 +643,6 @@ export default function App() {
             <ActivityProvider>
               <AuthProvider> 
                 <View style={[styles.container, { backgroundColor: colors.background }]}>
-                  <StatusBar style={theme === 'dark' ? 'light' : 'dark'} backgroundColor={colors.background} />
 
                   {renderContent()}
 
