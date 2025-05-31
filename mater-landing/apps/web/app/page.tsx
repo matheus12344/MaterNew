@@ -29,12 +29,12 @@ export default function Home() {
             >
               Em Desenvolvimento
             </motion.span>
-            <Link
+            <a
               href="/careers"
               className="px-4 py-2 border border-blue-600 text-blue-600 rounded-full hover:bg-blue-50 transition-all duration-300"
             >
               Trabalhe Conosco
-            </Link>
+            </a>
           </div>
         </div>
       </header>
@@ -84,18 +84,18 @@ export default function Home() {
               transition={{ duration: 0.5, delay: 1 }}
               className="flex flex-col md:flex-row gap-4 justify-center items-center"
             >
-              <Link
+              <a
                 href="#features"
                 className="px-8 py-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 Saiba Mais
-              </Link>
-              <Link
+              </a>
+              <a
                 href="#subscribe"
                 className="px-8 py-3 bg-white text-blue-600 rounded-full border-2 border-blue-600 hover:bg-blue-50 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
               >
                 Quero Participar
-              </Link>
+              </a>
             </motion.div>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -292,7 +292,7 @@ export default function Home() {
             <div>
               <h3 className="text-xl font-bold mb-4 gradient-text">Mater</h3>
               <p className="text-gray-400">
-                Transformando a forma como você gerencia suas tarefas diárias
+              Transformando a assistência veicular em uma experiência simples e rápida.
               </p>
             </div>
             <div>
@@ -309,9 +309,9 @@ export default function Home() {
                   </a>
                 </li>
                 <li>
-                  <Link href="/careers" className="text-gray-400 hover:text-white transition-colors">
+                  <a href="/careers" className="text-gray-400 hover:text-white transition-colors">
                     Trabalhe Conosco
-                  </Link>
+                  </a>
                 </li>
               </ul>
             </div>

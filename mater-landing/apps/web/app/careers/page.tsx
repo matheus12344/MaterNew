@@ -246,12 +246,44 @@ export default function Careers() {
             <motion.div
               initial={{ opacity: 0, scale: 0.9 }}
               whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="rounded-xl overflow-hidden shadow-xl"
+            >
+              <Image
+                src="/images/recepcao.png"
+                alt="Recepção da Mater"
+                width={700}
+                height={500}
+                layout="responsive"
+                objectFit="cover"
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.5 }}
+              viewport={{ once: true }}
+              className="rounded-xl overflow-hidden shadow-xl"
+            >
+              <Image  
+                src="/images/salareuniao.png"
+                alt="Sala de reunião da Mater"
+                width={700}
+                height={500}
+                layout="responsive"
+                objectFit="cover"
+              />
+            </motion.div>
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              whileInView={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               viewport={{ once: true }}
               className="rounded-xl overflow-hidden shadow-xl"
             >
               <Image
-                src="/images/predio.png"
+                src="/images/sala.png"
                 alt="Prédio da Mater"
                 width={700}
                 height={500}
@@ -367,7 +399,7 @@ export default function Careers() {
             <div>
               <h3 className="text-xl font-bold mb-4 gradient-text">Mater</h3>
               <p className="text-gray-400">
-                Transformando a forma como você gerencia suas tarefas diárias
+                Transformando a assistência veicular em uma experiência simples e rápida.
               </p>
             </div>
             <div>
